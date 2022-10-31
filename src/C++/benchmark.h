@@ -193,7 +193,7 @@ public:
         // printf("Entries normalised\n");
 
         // write P_est to file
-        FILE *f = (FILE *) fopen("spatial_MDP_est.txt","w");
+        FILE * f = (FILE *) fopen("spatial_MDP_est.txt","w");
         
         // fopen("spatial_MDP_est.txt", "w");
         for(int i=0; i<N_init; i++){

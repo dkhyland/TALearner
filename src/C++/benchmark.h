@@ -149,8 +149,8 @@ public:
     
     void learn_spatial_MDP(int grid_type=3, int DFA_states=3, int n = 34, int seq = 275, int maxIt = 25000, double tol = 1e-6, double init_P_est = 1.0, HMM * hmm_MDP = NULL, double ** SP_init = NULL){
         // Create example
-        N = grid_MDP->N;
-        M = grid_MDP->M;
+        // N = grid_MDP->N;
+        // M = grid_MDP->M;
 
         VEC(int) params = {N,M,n,seq};
         
@@ -176,6 +176,8 @@ public:
             }
         }
 
+        printf("Estimated spatial MDP copied\n");
+
         // Normalise entries
         for(int i=0; i<N_init; i++){
             //Sum each row
@@ -188,7 +190,7 @@ public:
             }
         }
 
-
+        printf("Entries normalised\n");
 
         // write P_est to file
         FILE *f = fopen("spatial_MDP_est.txt", "w");
@@ -198,6 +200,9 @@ public:
             }
             if(i<N_init-1) fprintf(f, "\n");
         }
+
+        printf("File written\n");
+
         // //close file
         fclose(f);
         printf("Spatial MDP estimated\n");

@@ -62,14 +62,18 @@ public:
                 free(SP_init[i]);
             }
             free(SP_init);
+            printf("SP_init freed\n");
             for(int i=0; i<N; i++){
-            free(SP_est[i]);
-            free(SE_est[i]);
+                free(SP_est[i]);
+                free(SE_est[i]);
             }
             free(SP_est);
             free(SE_est);
+            printf("SP_est freed\n");
             delete(hmm_MDP);
+            printf("hmm_MDP freed\n");
             delete(grid_MDP);
+            printf("grid_MDP freed\n");
         }
         else{
 

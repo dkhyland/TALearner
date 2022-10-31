@@ -62,18 +62,18 @@ public:
                 free(SP_init[i]);
             }
             free(SP_init);
-            printf("SP_init freed\n");
+            // printf("SP_init freed\n");
             for(int i=0; i<N; i++){
                 free(SP_est[i]);
                 free(SE_est[i]);
             }
             free(SP_est);
             free(SE_est);
-            printf("SP_est freed\n");
+            // printf("SP_est freed\n");
             delete(hmm_MDP);
-            printf("hmm_MDP freed\n");
+            // printf("hmm_MDP freed\n");
             delete(grid_MDP);
-            printf("grid_MDP freed\n");
+            // printf("grid_MDP freed\n");
         }
         else{
 
@@ -176,7 +176,7 @@ public:
             }
         }
 
-        printf("Estimated spatial MDP copied\n");
+        // printf("Estimated spatial MDP copied\n");
 
         // Normalise entries
         for(int i=0; i<N_init; i++){
@@ -190,18 +190,22 @@ public:
             }
         }
 
-        printf("Entries normalised\n");
+        // printf("Entries normalised\n");
 
         // write P_est to file
-        FILE *f = fopen("spatial_MDP_est.txt", "w");
+        FILE *f = (FILE *) fopen("spatial_MDP_est.txt","w");
+        
+        // fopen("spatial_MDP_est.txt", "w");
         for(int i=0; i<N_init; i++){
             for(int j=0; j<N_init; j++){
                 fprintf(f, "%f ", SP_init[i][j]);
             }
-            if(i<N_init-1) fprintf(f, "\n");
+            if(i<N_init-1){
+                fprintf(f, "\n");
+            }
         }
 
-        printf("File written\n");
+        // printf("File written\n");
 
         // //close file
         fclose(f);

@@ -175,18 +175,20 @@ public:
 		  y = observations such that the conditional distribution of y[k]
 		  given x[k] is E(x[k], :)
 	*/
-	void HMMsample(VEC(double) nu, VEC2D(double) P, VEC2D(double) E, VEC(int) * x, VEC(int) * y){
+	void HMMsample(VEC(double) nu, VEC2D(double) P, VEC2D(double) E, int * x, int * y){
 		int k;
 		// Sample first transition
 		// (*x)[0] = randm(nu);
 		// (*y)[0] = randm(E[(*x)[0]]);
-		(*x)[0] = randm(P[0]);
-		(*y)[0] = randm(E[(*x)[0]]);
+		// (*x)[0] = randm(P[0]);
+		// (*y)[0] = randm(E[(*x)[0]]);
+		x[0] = randm(P[0]);
+		y[0] = randm(E[x[0]]);
 
 		// Sample rest of transitions
 		for(k=1; k<n; k++){
-			(*x)[k] = randm(P[(*x)[k-1]]);
-			(*y)[k] = randm(E[(*x)[k]]);
+			x[k] = randm(P[x[k-1]]);
+			y[k] = randm(E[x[k]]);
 		}
 	} 
 
@@ -200,7 +202,7 @@ public:
 		  c(t) = conditional likelihood: P(Y[t] = y[t]| Y[0:t-1]=y[0:t-1]) (size n)
 		  ll = log sum of logs of c(t)
 	*/
-	double HMMfilter(VEC(int) y, VEC(double) nu, double ** P_e, double ** E_e, double ** fs,  double * c){
+	double HMMfilter(int * y, VEC(double) nu, double ** P_e, double ** E_e, double ** fs,  double * c){
 		int i,j,t;
 		double ll = 0;
 		VEC(double) alpha(N,0.0);
@@ -236,7 +238,7 @@ public:
 	}
 
 
-	double HMMfilter_opt(VEC(int) y, VEC(double) nu, double ** P_e, double ** E_e, double ** fs,  double * c, int * nzc, int ** nzc_row, int opt){
+	double HMMfilter_opt(int * y, VEC(double) nu, double ** P_e, double ** E_e, double ** fs,  double * c, int * nzc, int ** nzc_row, int opt){
 		int i,j,k,t;
 		double ll = 0;
 		VEC(double) alpha(N,0.0);
@@ -302,7 +304,7 @@ public:
 		  permits to compute the posterior distribution of the hidden states 
 		  P(X[t]=x | Y[0:n]=y[0:n])  as post = fs .* bs
 	*/
-	void HMMsmoother(VEC(int) y, double ** P_e, double ** E_e, double * c, double ** bs){
+	void HMMsmoother(int * y, double ** P_e, double ** E_e, double * c, double ** bs){
 		int i,j,t;
 		double z;
 		for(t=0;t<n+1;t++){
@@ -322,7 +324,7 @@ public:
 		}
 	}
 
-	void HMMsmoother_opt(VEC(int) y, double ** P_e, double ** E_e, double * c, double ** bs, int * nzr, int ** nzr_col, int opt){
+	void HMMsmoother_opt(int * y, double ** P_e, double ** E_e, double * c, double ** bs, int * nzr, int ** nzr_col, int opt){
 		int i,j,k,t;
 		double z;
 		for(t=0;t<n+1;t++){
@@ -413,7 +415,7 @@ public:
 		  E = estimated probabilities of transition: E(x,y) = estimate of P(Y=y | X=x) for 0<=x<k
 		  l = log-likelihood of y for parameters P and E
 	*/
-	double HMMtrain(VEC2D(int) y, VEC(double) nu, double ** P_est, double ** E_est, double tol, int maxIt){
+	double HMMtrain(int ** y, VEC(double) nu, double ** P_est, double ** E_est, double tol, int maxIt){
 		int i, j, r, it, t;
 		// int k;
 		r = 0;
@@ -606,7 +608,7 @@ public:
 		  E = estimated probabilities of transition: E(x,y) = estimate of P(Y=y | X=x) for 0<=x<k
 		  l = log-likelihood of y for parameters P and E
 	*/
-	double HMMtrain_opt(VEC2D(int) y, VEC(double) nu, double ** P_est, double ** E_est, double tol, int maxIt){
+	double HMMtrain_opt(int ** y, VEC(double) nu, double ** P_est, double ** E_est, double tol, int maxIt){
 		int i, j, k, r, it, t, opt;
 		// int k;
 		r = 0;
@@ -941,16 +943,41 @@ public:
 			print_matrices_ptr(P_est, E_est);
 		}
 		
+		printf("Running Baum-Welch algorithm\n");
 
 		// Multiple trials
-		VEC2D(int) x_m(seq, VEC(int)(n, 0));
-		VEC2D(int) y_m(seq, VEC(int)(n, 0));
-		VEC2D(int) y_m_ext(seq, VEC(int)(n+1, 0));
+		// VEC2D(int) x_m(seq, VEC(int)(n, 0));
+		x_m = (int **) malloc(seq * sizeof(int *));
+		for(i=0; i<seq; i++){
+			x_m[i] = (int *) malloc(n * sizeof(int));
+			for(j=0; j<n; j++){
+				x_m[i][j] = 0;
+			}
+		}
+
+		// VEC2D(int) y_m(seq, VEC(int)(n, 0));
+		y_m = (int **) malloc(seq * sizeof(int *));
+		for(i=0; i<seq; i++){
+			y_m[i] = (int *) malloc(n * sizeof(int));
+			for(j=0; j<n; j++){
+				y_m[i][j] = 0;
+			}
+		}
+		// VEC2D(int) y_m_ext(seq, VEC(int)(n+1, 0));
+		y_m_ext = (int **) malloc(seq * sizeof(int *));
+		for(i=0; i<seq; i++){
+			y_m_ext[i] = (int *) malloc((n+1) * sizeof(int));
+			for(j=0; j<n+1; j++){
+				y_m_ext[i][j] = 0;
+			}
+		}
+		
+
 		clock_t begin, end;
 		double tps;
 		VEC(double) nu(N, 0.0); 
 		nu[0] = 1.0;
-		
+
 		P_tmp = (double **) malloc(N * sizeof(double *));
 		E_tmp = (double **) malloc(N * sizeof(double *));
 		for(i=0; i<N; i++){
@@ -971,7 +998,7 @@ public:
 		// printf("HMM sampling\n");
 		int round = 0;
 		for(round = 0; round < seq; round++){
-			HMMsample(nu, P, E, &x_m[round], &y_m[round]);
+			HMMsample(nu, P, E, x_m[round], y_m[round]);
 		}
 		
 		int wins = 0;
@@ -1005,9 +1032,6 @@ public:
 		//Run Baum-Welch algorithm
 		begin = clock();
 		ll = HMMtrain_opt(y_m_ext, nu, P_est, E_est, tol, maxIt);
-		// for(int i=0; i<10000; i++){
-		// 	ll = HMMtrain_opt(y_m_ext, nu, P_est, E_est, 1e-7, 20);
-		// }
 		end = clock();
 
 		tps = (end-begin)/(CLOCKS_PER_SEC);
@@ -1015,8 +1039,8 @@ public:
 		printf("Final estimates\n");
 		print_matrices_ptr(P_est, E_est);
 
-		printf("True Matrices\n");
-		print_matrices(P,E);
+		// printf("True Matrices\n");
+		// print_matrices(P,E);
 
 		printf("Difference from true P: %.9f\n",diff_P(P_est,P));
 
@@ -1026,11 +1050,30 @@ public:
 		// free allocated memory
 		for(i=0;i<N;i++){
 			free(P_tmp[i]);
+			P_tmp[i] = NULL;
 			free(E_tmp[i]);
+			E_tmp[i] = NULL;
 		}
 		free(P_tmp);
+		P_tmp = NULL;
 		free(E_tmp);
+		E_tmp = NULL;
 
+		// free x_m, y_m, and y_m_ext
+		for(i=0;i<seq;i++){
+			free(x_m[i]);
+			free(y_m[i]);
+			free(y_m_ext[i]);
+			x_m[i] = NULL;
+			y_m[i] = NULL;
+			y_m_ext[i] = NULL;
+		}
+		free(x_m);
+		free(y_m);
+		free(y_m_ext);
+		x_m = NULL;
+		y_m = NULL;
+		y_m_ext = NULL;
 		printf("n = %d\n",n);
 		printf("HMM done\n");
 		return ll;
@@ -1043,6 +1086,9 @@ protected:
 	double ** E_est;
 	double ** P_tmp;
 	double ** E_tmp;
+	int ** x_m;
+	int ** y_m;
+	int ** y_m_ext;
 	VEC2D(double) P;
 	VEC2D(double) E;
 	double ll;

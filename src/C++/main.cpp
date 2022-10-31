@@ -85,17 +85,9 @@ int main(int argc, char ** argv){
 				return 1;
 			}
 		}
-		if(mode == 0){
-			bench->run(grid_size,DFA_states,n,seq,maxIt,tol,init_P_est,filename.c_str(), mode);
-		}
-		else{
-			if(init_P_est == 0){
-				init_P_est = 1.0;
-			}
-			bench->run(grid_size,DFA_states,n,seq,maxIt,tol,init_P_est,filename.c_str(), mode);
-		}
-		
+		bench->run(grid_size,DFA_states,n,seq,maxIt,tol,init_P_est,filename.c_str(), mode);
 	}
+	delete(bench);
 	printf("Done\n");
 	return 0;
 }

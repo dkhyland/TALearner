@@ -215,10 +215,8 @@ public:
             printf("Calculating Product MC\n");
             // Calculate initial estimate of product MC based on own policy and guess of number of states in the DFA
             P_init = env->calcProdMC(P_chain, env->DFA(init_list), L);
-
             // Calculate true product MC
             P = env->calcProdMC(P_chain, env->DFA(list), L);
-
             n_accept = 1;
             VEC2D(double) I = Identity(MC_states);
             
@@ -292,6 +290,7 @@ public:
         DFA_state_bound_guess = DFA_states;
         n_guess_accept = 1;
         // n = MC_states * DFA_state_bound_guess;
+        // delete(env);
     }
 
     /* Conventions for gridworlds
@@ -446,7 +445,7 @@ public:
         M = N;
         MC_states = N;
         num_labels = 6;
-        init_list = list_4;
+        init_list = list_5;
         P_init = Identity(N);
     }
 
